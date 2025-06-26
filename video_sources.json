@@ -1,0 +1,39 @@
+import requests
+from bs4 import BeautifulSoup
+import json
+
+def extract_video_sources(url):
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    video_urls = []
+
+    # 抓取 <video> 標籤的 src 屬性
+    for video in soup.find_all('video'):
+        src = video.get('src')
+        if src:
+            video_urls.append(src)
+
+    # 抓取 <source> 標籤的 src 屬性
+    for source in soup.find_all('source'):
+        src = source.get('src')
+        if src:
+            video_urls.append(src)
+
+    return video_urls
+
+# 🔧 請輸入要擷取的網站 URL
+target_url = "https://hanime1.me/"
+
+# 擷取影片連結
+video_links = extract_video_sources(target_url)
+
+# 儲存為 .json 檔案
+output_filename = "video_sources.json"
+with open(output_filename, 'w', encoding='utf-8') as f:
+    json.dump(video_links, f, ensure_ascii=False, indent=4)
+
+print(f"已儲存影片來源到：{output_filename}")
